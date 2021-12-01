@@ -1,9 +1,8 @@
 (ns advent.day1
   (:require [clojure.string :as str]))
 
-(def data (slurp "resources/day1/example.data"))
+(def data (slurp "resources/data/day1/input.data"))
 (def theints (map #(Integer/parseInt %) (str/split data #"\n")))
-
 (defn part1 [numset]
   (loop [remset numset
          result 0]
@@ -20,12 +19,13 @@
 (defn part2 [nums]
   (loop [remset nums
          inccounter 0
-         lastsum 0]
+         lastsum nil]
     (if (empty? remset)
       inccounter
       (recur (rest remset)
              (if
               (and (second remset)
+                   (not (nil? lastsum))
                    (< lastsum (apply + (take 3 remset))))
                (inc inccounter)
                inccounter)
