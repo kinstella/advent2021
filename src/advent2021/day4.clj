@@ -51,8 +51,7 @@
 
           ; failing base case
           (or (nil? call) (empty? rem-calls))
-          (do (println "no bingo was found " curboards)
-              nil)
+          (println "no bingo was found " curboards)
 
           :else
           (recur (rest rem-calls)
@@ -60,7 +59,46 @@
                   #(replace-match-with-X call %)
                   curboards)
                  call))))))
+
+;; TODO: could use reduce instead of doing all this
+(defn sum-before-bingo [board calls]
+  (loop [rem-calls calls
+         newboard board
+         lastcall nil]
+    (if (has-bingo? newboard)
+      (* (Integer/parseInt lastcall)
+         (board-sum newboard))
+      (recur (rest rem-calls)
+             (replace-match-with-X
+              (first rem-calls) newboard)
+             (first rem-calls)))))
+
+;; similar to find-winning-board, but lets remove each winning board until we have one board left
+(defn find-last-winning [lines]
+  (let [calls (str/split (first lines) #",")
+        boards (lines-to-boards (rest lines))]
+    (loop [rem-calls calls
+           curboards boards
+           lastcall nil]
+
+      (let [call (first rem-calls)] ; testing each call
+        (cond
+          (= 1 (count curboards)) ; down to the last board...
+          (sum-before-bingo (last curboards) rem-calls)
+
+          ; failing base case
+          (or (nil? call) (empty? rem-calls))
+          (println "no bingo was found " curboards)
+
+          :else
+          (let [assessed-boards (mapv
+                                 #(replace-match-with-X call %)
+                                 curboards)]
+            (recur (rest rem-calls)
+                   (filter #(not (has-bingo? %)) assessed-boards)
+                   call)))))))
+
 (comment
   (find-winning-board lines)
-
+  (find-last-winning lines)
   #_endcomment)
