@@ -1,4 +1,6 @@
 (ns advent2021.core
+  (:require
+   [advent2021.days.core :as days])
   (:gen-class))
 
 (defn -main
