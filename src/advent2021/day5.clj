@@ -6,7 +6,7 @@
 (def lines (str/split-lines
             (slurp "resources/data/day5/input.data")))
 
-;; too hungry to refactor everything, so let's use an atom 
+;; too hungry to refactor everything, so let's use an atom to differentiate 1 and 2
 (def allow-diags? (atom false))
 (def graph-atom (atom []))
 
@@ -50,7 +50,7 @@
           (range (min (:start-x seg) (:end-x seg))
                  (inc (max (:start-x seg) (:end-x seg))))
           (repeat (:end-y seg))))
-    :else ; something else
+    :else ; diagonal...probably
     (if @allow-diags?
       (let [xdiff (- (:end-x seg) (:start-x seg))
             ydiff (- (:end-y seg) (:start-y seg))]
@@ -58,7 +58,6 @@
           (conj [(if (pos? xdiff)
                    (+ (:start-x seg) i)
                    (- (:start-x seg) i))
-
                  (if (pos? ydiff)
                    (+ (:start-y seg) i)
                    (- (:start-y seg) i))])))
@@ -71,17 +70,14 @@
    (first point)))
 
 (defn plot-point [point s]
-  (let [grid @graph-atom
-        curvalue (get-point point)
-        newvalue (inc curvalue)
-        row-to-update (nth @graph-atom (second point))
-        new-row (assoc row-to-update (first point) newvalue)]
-    (assoc grid (second point) new-row)
-    (reset! graph-atom (assoc grid  (second point) new-row))))
+  (reset! graph-atom
+          (assoc @graph-atom (second point)
+                 (assoc (nth @graph-atom (second point)) (first point)
+                        ; add one to current graph location value
+                        (inc (get-point point))))))
 
 (defn plot-line [seg]
   (let [thepoints (points-from-seg seg)]
-    ;(println "the points: " thepoints)
     (mapv #(plot-point % 1) thepoints)))
 
 (defn plot-everything [d]
@@ -92,7 +88,6 @@
   (count (map dec (filter #(> % 1) (flatten @graph-atom)))))
 
 (comment
-
   ; part 1
   (reset! allow-diags? false)
   (plot-everything lines)
