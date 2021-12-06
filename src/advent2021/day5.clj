@@ -6,6 +6,8 @@
 (def lines (str/split-lines
             (slurp "resources/data/day5/input.data")))
 
+;; too hungry to refactor everything, so let's use an atom 
+(def allow-diags? (atom false))
 (def graph-atom (atom []))
 
 (defn lines-to-segmaps [lines]
@@ -35,6 +37,7 @@
               (mapv (fn [x] (mapv (fn [y] ((constantly 0) x y))
                                   (range (inc max-y)))) (range (inc max-x)))))))
 
+;; version with diagonals
 (defn points-from-seg [seg]
   (cond
     (= (:start-x seg) (:end-x seg)) ; horizontal segment...
@@ -48,7 +51,19 @@
                  (inc (max (:start-x seg) (:end-x seg))))
           (repeat (:end-y seg))))
     :else ; something else
-    nil))
+    (if @allow-diags?
+      (let [xdiff (- (:end-x seg) (:start-x seg))
+            ydiff (- (:end-y seg) (:start-y seg))]
+        (for [i (range 0 (inc (Math/abs (- (:start-x seg) (:end-x seg)))))]
+          (conj [(if (pos? xdiff)
+                   (+ (:start-x seg) i)
+                   (- (:start-x seg) i))
+
+                 (if (pos? ydiff)
+                   (+ (:start-y seg) i)
+                   (- (:start-y seg) i))])))
+      nil)))
+
 
 (defn get-point [point]
   (nth
@@ -66,6 +81,7 @@
 
 (defn plot-line [seg]
   (let [thepoints (points-from-seg seg)]
+    ;(println "the points: " thepoints)
     (mapv #(plot-point % 1) thepoints)))
 
 (defn plot-everything [d]
@@ -76,9 +92,13 @@
   (count (map dec (filter #(> % 1) (flatten @graph-atom)))))
 
 (comment
-  ;; how many functional programming points do I lose for using an atom here?
 
   ; part 1
+  (reset! allow-diags? false)
+  (plot-everything lines)
+
+  ; part 2
+  (reset! allow-diags? true)
   (plot-everything lines)
 
   #_endcomment)
