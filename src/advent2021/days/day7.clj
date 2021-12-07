@@ -16,8 +16,8 @@
           (for [x (range 0 (reduce max positions))]
             (assess-fuel-cost positions x))))
 
-; Part 2 - weighted cost
-(defn assess-weighted-cost [positions num]
+; Part 2 - increasing cost
+(defn assess-increasing-cost [positions num]
   (reduce + (map #(let [d (Math/abs (- num %))]
                     (apply + (range 1 (inc d)))) positions)))
 
@@ -25,7 +25,7 @@
   (reduce (fn [lowest new-num]
             (min lowest new-num))
           (for [x (range 0 (reduce max positions))]
-            (assess-weighted-cost positions x))))
+            (assess-increasing-cost positions x))))
 
 (comment
   (lowest-fuel-cost-part1)
