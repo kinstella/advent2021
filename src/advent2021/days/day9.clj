@@ -1,7 +1,5 @@
 (ns advent2021.days.day9
-  (:require [clojure.string :as str]
-            [clojure.set :as set]))
-
+  (:require [clojure.string :as str]))
 (def example-data (slurp "resources/data/day9/example.data"))
 (def data (slurp "resources/data/day9/input.data"))
 (def lines (str/split-lines data))
@@ -90,7 +88,5 @@
 
 (comment
   (part-1 lines)
-
   (part-2 lines)
-
   #_endcomment)
