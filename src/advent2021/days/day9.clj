@@ -43,12 +43,11 @@
          basinset #{}]
     (if (empty? searchset)
       basinset
-      (do
-        (let [nextneighbors (get-basin-neighbors (first searchset) matrix)]
-          (recur (apply conj
-                        (rest searchset)
-                        (filter #(not (contains? basinset %)) nextneighbors))
-                 (conj basinset (first searchset))))))))
+      (let [nextneighbors (get-basin-neighbors (first searchset) matrix)]
+        (recur (apply conj
+                      (rest searchset)
+                      (filter #(not (contains? basinset %)) nextneighbors))
+               (conj basinset (first searchset)))))))
 
 (defn find-lowest-points [matrix]
   (for [row (range 0 (count matrix))]
@@ -61,9 +60,8 @@
   (for [row (range 0 (count matrix))]
     (let [currow (aget matrix row)]
       (for [col (range 0 (count currow))]
-        (do
-          (when (lowest-of-neighbors? row col matrix)
-            (conj [row col])))))))
+        (when (lowest-of-neighbors? row col matrix)
+          (conj [row col]))))))
 
 (defn create-matrix [lines]
   (to-array-2d
@@ -87,8 +85,7 @@
                           (conj counts (count basin))))
                       []
                       lowestrowcols)]
-    (reduce * (take 3 (reverse (sort sizes))))
-    ))
+    (reduce * (take 3 (reverse (sort sizes))))))
 
 
 (comment
