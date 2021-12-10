@@ -81,7 +81,7 @@
                              (score-completion-string
                               (map #(get bracket-map %) (reverse rs)))) rem-stacks)]
     ; and get the middle score of final scores
-    (nth (sort completion-scores) (/ (count completion-scores) 2))))
+    (nth (sort completion-scores) (/ (Math/ceil (count completion-scores)) 2))))
 
 (comment
 
