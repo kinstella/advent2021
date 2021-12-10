@@ -8,3 +8,9 @@
 
 (defn init [])
 
+(defn handle-run [day part]
+  (case day
+    "1"
+    (case part
+      "1" day1/part1
+      "2" day1/part2)))
