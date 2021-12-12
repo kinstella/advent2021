@@ -9,7 +9,6 @@
 (def flash-count (atom 0))
 (def flashed-items (atom []))
 (def flashed-in-step (atom #{}))
-(def iterations (atom 0))
 
 (defn create-matrix [rows]
   (mapv (fn [i]
@@ -32,21 +31,18 @@
   (nth (nth m x) y))
 
 (defn handle-flashing [m r c]
-  (println "flashed in this step is:  " @flashed-in-step)
   (if (not (contains? @flashed-in-step [r c]))
     (do
       (reset! flashed-in-step (conj @flashed-in-step [r c]))
       (swap! flash-count inc) ; incr the global flash count
       (reset! flashed-items (conj (vec @flashed-items) [r c])) ; add point to global flashed items
-      (println "added " [r c] " to to-be-flashed list..." @flashed-items))
+      )
     (println "This  " [r c] " has already flashed this step."))
   ; cycle through matrix until all flashing and adjacent flashing is done
   0)
 
 (defn inc-point [m r c]
-  ; if it flashed, then add it to flashlist 
-  ; return new matrix
-  m
+  ; if it flashed, then add it to flashlist - return new matrix
   (let [retmatrix (if (and (in-matrix? m r c) (not (contains? @flashed-in-step [r c])))
                     (let [curval (get-at m r c)]
                       (if (< curval 9)
@@ -56,10 +52,10 @@
                     )]
     retmatrix))
 
-(defn inc-neighbors [m [r c]]
-  ; increase all neighbors of flashed point. 
-  ; return a matrix after they've all been increased
- ;;(println "increasing neighbors of: " [r c])
+(defn inc-neighbors
+  " increase all neighbors of flashed point. 
+   return a matrix after they've all been increased"
+  [m [r c]]
   (vec (-> m
            (inc-point (dec r) (inc c)) ; right-up
            (inc-point r (inc c))       ; right
@@ -70,52 +66,18 @@
            (inc-point (dec r) (dec c)) ; left-up
            (inc-point (dec r) c))))     ; up
 
-;; (defn deal-with-flashed-items [given-m]
-;;   ; take a matrix, 
-;;   (println "There are now " (count @flashed-items) " items flashed.")
-;;   (reset! iterations 0)
-;;   (let [finished-m
-;;         (or (while (seq @flashed-items)
-;;               (swap! iterations inc)
-;;               (println "\n\niterations: " @iterations)
-;;               (if (> @iterations 1000)
-;;                 (do (display-matrix given-m)
-;;                     (throw (Exception. (str "WTF too many iterations." @flashed-items)))))
-;;               (reduce (fn [m item]
-;;                         ;(println "within reduce loop, flashed-items is: " @flashed-items)
-;;                         (let [increased-m (inc-neighbors m item)]
-;;                           (reset! flashed-items (rest @flashed-items))
-;;                           (println "after increasing neighbors, matrix is: " (display-matrix increased-m))
-;;                           increased-m))
-;;                       given-m ; starting with given-m
-;;                       @flashed-items)) given-m)]
-;;     (println "are we done with whle loop? returning finished-m\n " (display-matrix finished-m))
-;;     finished-m))
-
-(defn deal-with-flashed-items [given-m]
-  ; take a matrix, 
-  (println "There are now " (count @flashed-items) " items flashed.")
-  (reset! iterations 0)
+(defn process-flashed-items
+  "process list of flashed items"
+  [given-m]
   (loop [cur-flashed @flashed-items
          m given-m]
-
-    (println "to-be-flashed list is: " @flashed-items)
-    (println "to-be-flashed count is: " (count @flashed-items))
-    (println "cur flashed is: " cur-flashed)
     (if (empty? cur-flashed)
       m
-      (do
-        (println "current value of flashed item is: "
-                 (get-at m
-                         (first (first cur-flashed))
-                         (last (first cur-flashed))))
-
-        (let [new-matrix (inc-neighbors m (first cur-flashed))]
-          (display-matrix new-matrix)
-          (reset! flashed-items (rest @flashed-items))
-          (println "to-be-flashed is now:" @flashed-items)
-          (recur @flashed-items
-                 new-matrix))))))
+      (let [new-matrix (inc-neighbors m (first cur-flashed))]
+          ;(display-matrix new-matrix)
+        (reset! flashed-items (rest @flashed-items))
+        (recur @flashed-items
+               new-matrix)))))
 
 (defn inc-matrix
   "from starting matrix m, 
@@ -131,37 +93,29 @@
 (defn process-steps [m s]
   (reset! flash-count 0)
   (reset! flashed-items [])
+  (reset! flashed-in-step [])
   (reduce
    (fn [newm step]
-     (println "step " step)
+     (println "\n\nSTEP: " step)
      (if (= 100 (count @flashed-in-step))
-       (throw (Exception. (str "flashed in step count is: " (count @flashed-in-step) ". We can stop now!"))))
-     (reset! flashed-in-step #{})
-     (-> newm
-         (display-matrix)
-         (inc-matrix)
-         (deal-with-flashed-items)))
+       (reduced newm)
+       (do (reset! flashed-in-step #{})
+           (-> newm
+               ;(display-matrix)
+               (inc-matrix)
+               (process-flashed-items)))))
    m
    (range 0 s)))
 
 (comment
 
   (def the-matrix (create-matrix lines))
-  the-matrix
 
-  (process-steps the-matrix 340)
-  (reset! flashed-items  [])
-  (reset! flash-count 0)
-
-  (reset! flashed-items  [[0 0]])
-  @flashed-items
-  (deal-with-flashed-items the-matrix)
-  (inc-point (inc-point the-matrix 0 2) 0 2)
-
-  (conj #{} [1 2])
-
-  (inc-neighbors the-matrix [1 8])
-
-  (inc-matrix the-matrix)
+; part 1  
+  (process-steps the-matrix 100)
   @flash-count
+
+  ; part 2
+  (process-steps the-matrix 340)
+
   #_endcomment)
