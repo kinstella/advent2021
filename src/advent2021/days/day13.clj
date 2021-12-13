@@ -59,6 +59,15 @@
   (mapv #(println %) m))
 
 
+(defn perform-folds [folds m]
+  (reduce (fn [end-m fold]
+            (let [[folddir foldat] fold]
+              (if (= folddir "x")
+                (fold-at-x end-m (Integer/parseInt foldat))
+                (fold-at-y end-m (Integer/parseInt foldat)))))
+          m
+          folds))
+
 (comment
 
   (def matrix (create-matrix dots))
@@ -69,6 +78,9 @@
   (def folded-at-x-655 (fold-at-x matrix 655))
   (count-dots folded-at-x-655)
 
+; part 2
+  (def final-matrix (perform-folds folds matrix))
+  (display-matrix final-matrix)
 
   #_endcomment)
 
