@@ -3,7 +3,7 @@
 
 (def startingfish (map #(Integer/parseInt %)
                        (str/split
-                        (slurp "resources/data/day6/example.data") #",")))
+                        (slurp "resources/data/day6/input.data") #",")))
 
 (defn dec-fish [f]
   (let [newf (dec f)]
@@ -12,16 +12,13 @@
       newf)))
 
 (defn simulate-fish [days startingfish]
-  (loop [d (doall (range 1 days))
-         curfish startingfish]
-    (println "day: " (first d) " count: " (count curfish))
-    (let [nextfish (map dec-fish curfish)
-          babycount (count (filter #(= 0 %) curfish))
-          nextfish (concat nextfish (take babycount (repeat 8)))]
-      (if (< (count d)  1)
-        nextfish
-        (recur (rest d)
-               nextfish)))))
+  (reduce (fn [generation d]
+            (let [nextfish (mapv dec-fish generation)
+                  babycount (count (filter #(= 0 %) generation))]
+              (into nextfish (take babycount (repeat 8)))))
+          startingfish
+          (range 0 days)))
+
 
 (defn fish-spawned
   [days fnum]
@@ -32,7 +29,6 @@
 
   ; part 1
   (count (simulate-fish 256 startingfish))
-
 
 
   #_endcomment)
