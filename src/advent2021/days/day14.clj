@@ -42,4 +42,7 @@
   ; part 1
   (run-steps 10 rules)
 
+
+  (run-steps 40 rules)
+
   #_endcomment)

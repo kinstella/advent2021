@@ -94,18 +94,20 @@
   (reset! flash-count 0)
   (reset! flashed-items [])
   (reset! flashed-in-step [])
-  (reduce
-   (fn [newm step]
-     (println "\n\nSTEP: " step)
-     (if (= 100 (count @flashed-in-step))
-       (reduced newm)
-       (do (reset! flashed-in-step #{})
-           (-> newm
+  (let [final-m
+        (reduce
+         (fn [newm step]
+           (if (= 100 (count @flashed-in-step))
+             (do (println "STEP: " step)
+                 (reduced newm))
+             (do (reset! flashed-in-step #{})
+                 (-> newm
                ;(display-matrix)
-               (inc-matrix)
-               (process-flashed-items)))))
-   m
-   (range 0 s)))
+                     (inc-matrix)
+                     (process-flashed-items)))))
+         m
+         (range 0 s))]
+    (display-matrix final-m)))
 
 (comment
 
