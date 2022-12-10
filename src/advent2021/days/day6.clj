@@ -36,6 +36,7 @@
                (inc d))))))
 
 (comment
+  (fish-count-by-num 80 startingfish)
   
   (fish-count-by-num 256 startingfish)
   
